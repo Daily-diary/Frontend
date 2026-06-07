@@ -1,0 +1,76 @@
+@import '../../styles/tokens.css';
+
+.friend-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin: var(--space-lg);
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+}
+
+.friend-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: var(--font-size-base);
+  background: transparent;
+  color: var(--color-text-strong);
+}
+
+.friend-search input::placeholder {
+  color: var(--color-text-faint);
+}
+
+.friend-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  padding: 0 var(--space-lg) var(--space-md);
+}
+
+.friend-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 0 var(--space-lg) var(--space-lg);
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm) var(--space-md);
+  box-shadow: var(--shadow-card);
+}
+
+.friend-row__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.friend-row__name {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-strong);
+  font-size: var(--font-size-base);
+}
+
+.friend-row__bio {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friend-row__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
