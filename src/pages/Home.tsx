@@ -18,10 +18,10 @@ const Home = () => {
     const mockData: Diary[] = [
       {
         id: 1,
-        nickname: "Sunyjun1",
+        nickname: "석현",
         profileImage: "https://via.placeholder.com/40",
         mood: "뿌듯함",
-        content: "드디어 프론트엔드 라우터 세팅 완료!",
+        content: "세팅 ...",
         images: [
           "https://via.placeholder.com/400x300",
           "https://via.placeholder.com/400x300"
