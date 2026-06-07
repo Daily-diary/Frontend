@@ -1,0 +1,82 @@
+@import '../../styles/tokens.css';
+
+.feed-detail__images {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.feed-detail__images img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  object-fit: cover;
+}
+
+.feed-detail__body {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.feed-detail__author {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.feed-detail__author .name {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-strong);
+}
+
+.feed-detail__author .date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.feed-detail__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-strong);
+}
+
+.feed-detail__content {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  white-space: pre-wrap;
+}
+
+.feed-detail__actions {
+  display: flex;
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.feed-detail__actions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-primary-softer);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+
+.feed-detail__actions button.liked {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+
+.feed-detail__actions button:active {
+  transform: scale(0.95);
+}
