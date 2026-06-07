@@ -1,0 +1,180 @@
+@import '../../styles/tokens.css';
+
+.mypage-hero {
+  height: 140px;
+  background: var(--gradient-header);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.mypage-card {
+  position: relative;
+  margin: -64px var(--space-lg) 0;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.mypage-card .avatar {
+  margin: 0 auto var(--space-sm);
+}
+
+.mypage-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-strong);
+}
+
+.mypage-bio {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.mypage-stats {
+  display: flex;
+  margin-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-md);
+}
+
+.mypage-stats .stat {
+  flex: 1;
+}
+
+.mypage-stats .stat-value {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-strong);
+  display: block;
+}
+
+.mypage-stats .stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.mypage-actions {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-md);
+}
+
+.mypage-tabs {
+  display: flex;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-lg) var(--space-md);
+}
+
+.diary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 0 var(--space-lg);
+}
+
+.diary-grid__tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: 8px;
+  color: var(--color-text-strong);
+  font-size: 1.6rem;
+  border: 1px solid var(--color-border);
+}
+
+.diary-grid__tile img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.diary-grid__tile .tile-overlay {
+  position: relative;
+  z-index: 1;
+}
+
+.diary-grid__tile .lock-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  background: rgba(74, 63, 61, 0.5);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.mypage-settings {
+  display: flex;
+  flex-direction: column;
+  margin: var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.mypage-settings__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: var(--space-md);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  text-align: left;
+}
+
+.mypage-settings__item:last-child {
+  border-bottom: none;
+}
+
+.mypage-settings__item--danger {
+  color: var(--color-danger);
+}
+
+.mypage-settings__item svg {
+  flex-shrink: 0;
+}
+
+.mypage-settings__item span:nth-child(2) {
+  flex: 1;
+}
+
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.edit-profile-avatar-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.edit-profile-avatar-row button {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary-strong);
+  background: var(--color-primary-softer);
+  border: none;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-weight-semibold);
+}
