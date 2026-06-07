@@ -1,0 +1,66 @@
+@import './tokens.css';
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--layout-max-width);
+  height: var(--nav-height);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 -6px 24px rgba(255, 154, 171, 0.1);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--color-text-faint);
+  font-weight: var(--font-weight-semibold);
+  transition: color var(--transition-base), transform var(--transition-base);
+  flex: 1;
+}
+
+.nav-text {
+  font-size: 0.7rem;
+}
+
+.nav-item.active {
+  color: var(--color-primary);
+}
+
+.nav-item.active svg {
+  transform: translateY(-2px);
+}
+
+/* 중앙 작성 버튼 — 떠있는 원형 그라데이션 버튼 */
+.nav-write {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-14px);
+  transition: transform var(--transition-bouncy), box-shadow var(--transition-base);
+  flex-shrink: 0;
+}
+
+.nav-write:active {
+  transform: translateY(-14px) scale(0.92);
+}
+
+.nav-write:hover {
+  box-shadow: var(--shadow-lg);
+}
