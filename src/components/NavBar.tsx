@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { type User } from 'firebase/auth';
 import Icon from './ui/Icon';
 import '../styles/NavBar.css';
 
@@ -7,9 +8,14 @@ const NAV_ITEMS = [
   { to: '/friend', label: '친구', icon: 'users' as const },
 ];
 
-const NavBar = () => {
+interface NavBarProps {
+  user: User | null;
+}
+
+const NavBar = ({ user }: NavBarProps) => {
   const location = useLocation();
   const isMyPage = location.pathname.startsWith('/mypage');
+  const isLogin = location.pathname.startsWith('/login');
 
   return (
     <nav className="bottom-nav">
@@ -31,6 +37,13 @@ const NavBar = () => {
         <Icon name="user" size={22} strokeWidth={isMyPage ? 2.1 : 1.7} />
         <span className="nav-text">마이페이지</span>
       </Link>
+
+      {!user && (
+        <Link to="/login" className={`nav-item ${isLogin ? 'active' : ''}`}>
+          <Icon name="user" size={22} strokeWidth={isLogin ? 2.1 : 1.7} />
+          <span className="nav-text">로그인</span>
+        </Link>
+      )}
     </nav>
   );
 };

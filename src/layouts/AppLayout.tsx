@@ -1,20 +1,34 @@
-import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { auth } from '../firebase';
 import NavBar from '../components/NavBar';
 import AppRoutes from '../routes/AppRoutes';
 
 const HIDDEN_NAV_PATHS = ['/login', '/register'];
+const PUBLIC_PATHS = ['/login', '/register'];
 
-/**
- * 공통 레이아웃 — 로그인/회원가입 화면을 제외한 모든 화면에 하단 네비게이션을 표시합니다.
- */
 const AppLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null | undefined>(undefined);
+
   const hideNav = HIDDEN_NAV_PATHS.some((path) => location.pathname.startsWith(path));
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      if (!u && !PUBLIC_PATHS.some((p) => location.pathname.startsWith(p))) {
+        navigate('/login');
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   return (
     <div className="app-container">
       <AppRoutes />
-      {!hideNav && <NavBar />}
+      {!hideNav && <NavBar user={user ?? null} />}
     </div>
   );
 };
