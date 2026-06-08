@@ -1,0 +1,31 @@
+@import '../../styles/tokens.css';
+@import '../Feed/FeedDetail.css';
+
+.diary-detail__menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.diary-detail__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 8px;
+  background: none;
+  border: none;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-strong);
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+
+.diary-detail__menu-item:active {
+  background: var(--color-primary-softer);
+}
+
+.diary-detail__menu-item--danger {
+  color: var(--color-danger);
+}
