@@ -83,6 +83,16 @@ function MyPage({ onNavigate }) {
     );
   }
 
+  if (!profile) {
+    return (
+      <div className="App">
+        <div className="mypage-card">
+          <p className="loading-text">{error || "프로필을 불러오는데 실패했습니다."}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="App">
       <div className="mypage-card">
