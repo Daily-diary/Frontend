@@ -1,0 +1,18 @@
+:root {
+  --layout-max-width: 600px;
+  --nav-height: 64px;
+
+  --color-primary: #ff9aab;
+  --color-border: #f0f0f0;
+  --color-text-faint: #aaa;
+
+  --font-weight-semibold: 600;
+
+  --gradient-primary: linear-gradient(135deg, #ffdde4 0%, #ff9aab 100%);
+
+  --shadow-md: 0 4px 12px rgba(255, 154, 171, 0.35);
+  --shadow-lg: 0 8px 24px rgba(255, 154, 171, 0.45);
+
+  --transition-base: 0.2s ease;
+  --transition-bouncy: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

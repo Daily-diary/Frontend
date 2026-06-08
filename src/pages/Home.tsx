@@ -42,17 +42,32 @@ const Home = () => {
         {feed.map((diary) => (
           <article key={diary.id} className="feed-card">
             <div className="feed-card-header">
-              <img src={diary.profileImage} alt="profile" className="profile-img" />
+              <img
+                src={diary.profileImage}
+                alt=""
+                className="profile-img"
+                onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+              />
               <div className="header-info">
                 <span className="nickname">{diary.nickname}</span>
                 <span className="date">{diary.date}</span>
               </div>
               <span className="mood">{diary.mood}</span>
             </div>
-            
+
             <div className="feed-card-images">
               {diary.images.map((img, idx) => (
-                <img key={idx} src={img} alt="diary" className="diary-img" />
+                <img
+                  key={idx}
+                  src={img}
+                  alt=""
+                  className="diary-img"
+                  onError={(e) => {
+                    const el = e.currentTarget;
+                    el.style.background = 'linear-gradient(135deg, #ffdde4, #ffc5d0)';
+                    el.removeAttribute('src');
+                  }}
+                />
               ))}
             </div>
             
