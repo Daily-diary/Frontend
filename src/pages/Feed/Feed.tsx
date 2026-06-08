@@ -1,0 +1,104 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Avatar, Icon, MoodTag, Spinner, EmptyState } from '../../components/ui';
+import { MOCK_DIARIES, ME } from '../../api/mockData';
+import type { Diary } from '../../types/models';
+import './Feed.css';
+
+const formatDate = (dateStr: string) => {
+  const d = new Date(dateStr);
+  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+};
+
+/**
+ * 친구 피드 조회 화면 (GET /api/feed)
+ * TODO: 백엔드 연동 시 mock 데이터 대신 axios 호출로 교체
+ */
+const Feed = () => {
+  const [feed, setFeed] = useState<Diary[] | null>(null);
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setFeed(MOCK_DIARIES), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const toggleLike = (id: string) => {
+    setLikedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  return (
+    <div className="page">
+      <section className="feed-hero">
+        <p className="feed-hero__greeting">{ME.username}님, 오늘 하루는 어땠나요?</p>
+        <h1 className="feed-hero__title">
+          친구들의 <span>오늘</span>을 들여다봐요
+        </h1>
+      </section>
+
+      {feed === null ? (
+        <Spinner />
+      ) : feed.length === 0 ? (
+        <EmptyState
+          icon={<Icon name="sparkle" size={28} color="var(--color-primary)" />}
+          title="아직 친구의 일기가 없어요"
+          description="친구를 추가하면 서로의 하루를 볼 수 있어요"
+        />
+      ) : (
+        <main className="feed-list">
+          {feed.map((diary) => {
+            const liked = likedIds.has(diary.id);
+            return (
+              <article key={diary.id} className="feed-card fade-in">
+                <div
+                  className="feed-card-header"
+                  onClick={() => navigate(`/feed/users/${diary.author.id}`)}
+                  role="button"
+                >
+                  <Avatar src={diary.author.profileImageUrl} name={diary.author.username} size={42} />
+                  <div className="header-info">
+                    <span className="nickname">{diary.author.username}</span>
+                    <span className="date">{formatDate(diary.diaryDate)}</span>
+                  </div>
+                  <MoodTag mood={diary.mood} size="sm" />
+                </div>
+
+                {diary.images.length > 0 && (
+                  <div className="feed-card-images" onClick={() => navigate(`/feed/${diary.id}`)} role="button">
+                    {diary.images.map((img) => (
+                      <img key={img.id} src={img.imageUrl} alt={diary.title} loading="lazy" />
+                    ))}
+                  </div>
+                )}
+
+                <div className="feed-card-body" onClick={() => navigate(`/feed/${diary.id}`)} role="button">
+                  <p className="feed-card-title">{diary.title}</p>
+                  <p className="feed-card-content">{diary.content}</p>
+                </div>
+
+                <div className="feed-card-actions">
+                  <button className={liked ? 'liked' : ''} onClick={() => toggleLike(diary.id)}>
+                    <Icon name={liked ? 'heart-filled' : 'heart'} size={19} />
+                    공감
+                  </button>
+                  <button onClick={() => navigate(`/feed/${diary.id}`)}>
+                    <Icon name="message" size={19} />
+                    이야기 나누기
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </main>
+      )}
+    </div>
+  );
+};
+
+export default Feed;

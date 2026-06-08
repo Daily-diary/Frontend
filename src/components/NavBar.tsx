@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import Icon from './ui/Icon';
+import { Icon } from './ui';
+import type { IconName } from './ui/Icon';
 import '../styles/NavBar.css';
 
-const NAV_ITEMS = [
-  { to: '/', label: '피드', icon: 'home' as const },
-  { to: '/friend', label: '친구', icon: 'users' as const },
+const NAV_ITEMS: { to: string; label: string; icon: IconName }[] = [
+  { to: '/', label: '피드', icon: 'home' },
+  { to: '/friend', label: '친구', icon: 'users' },
 ];
 
 const NavBar = () => {
