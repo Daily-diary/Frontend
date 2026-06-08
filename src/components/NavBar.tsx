@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { type User } from 'firebase/auth';
+import { signOut, type User } from 'firebase/auth';
+import { auth } from '../firebase';
 import Icon from './ui/Icon';
 import '../styles/NavBar.css';
 
@@ -38,7 +39,12 @@ const NavBar = ({ user }: NavBarProps) => {
         <span className="nav-text">마이페이지</span>
       </Link>
 
-      {!user && (
+      {user ? (
+        <button className="nav-item" onClick={() => signOut(auth)}>
+          <Icon name="logout" size={22} strokeWidth={1.7} />
+          <span className="nav-text">로그아웃</span>
+        </button>
+      ) : (
         <Link to="/login" className={`nav-item ${isLogin ? 'active' : ''}`}>
           <Icon name="user" size={22} strokeWidth={isLogin ? 2.1 : 1.7} />
           <span className="nav-text">로그인</span>
