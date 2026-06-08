@@ -3,16 +3,19 @@ import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { auth, googleProvider } from "./firebase";
 import MyPage from "./MyPage";
+import FriendPage from "./FriendPage";
 
 function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [page, setPage] = useState("mypage"); // "mypage" | "friends"
   const [error, setError] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
+      if (!currentUser) setPage("mypage");
     });
     return () => unsubscribe();
   }, []);
@@ -38,7 +41,10 @@ function App() {
   }
 
   if (user) {
-    return <MyPage />;
+    if (page === "friends") {
+      return <FriendPage onBack={() => setPage("mypage")} />;
+    }
+    return <MyPage onNavigate={setPage} />;
   }
 
   return (

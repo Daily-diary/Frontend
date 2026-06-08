@@ -8,7 +8,7 @@ import {
 } from "./api";
 import "./MyPage.css";
 
-function MyPage() {
+function MyPage({ onNavigate }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -183,6 +183,9 @@ function MyPage() {
         {success && <div className="success">{success}</div>}
         {error && <div className="error">{error}</div>}
 
+        <button className="btn" onClick={() => onNavigate("friends")}>
+          친구 관리
+        </button>
         <button className="btn btn-danger" onClick={handleLogout}>
           로그아웃
         </button>
