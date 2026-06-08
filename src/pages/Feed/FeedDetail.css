@@ -1,0 +1,86 @@
+@import '../../styles/tokens.css';
+
+.feed-detail__images {
+  width: 100%;
+  background: var(--color-surface-alt);
+}
+
+.feed-detail__images img {
+  width: 100%;
+  max-height: 340px;
+  object-fit: cover;
+  display: block;
+}
+
+.feed-detail__body {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.feed-detail__author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.feed-detail__author .name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+}
+
+.feed-detail__author .date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.feed-detail__title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-strong);
+  line-height: 1.4;
+}
+
+.feed-detail__content {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.feed-detail__actions {
+  display: flex;
+  gap: 8px;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.feed-detail__actions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.feed-detail__actions button:active,
+.feed-detail__actions button:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text-strong);
+}
+
+.feed-detail__actions button.liked {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-softer);
+}
