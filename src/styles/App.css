@@ -1,0 +1,10 @@
+@import './global.css';
+
+.app-container {
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  box-shadow: 0 0 32px rgba(255, 154, 171, 0.08);
+}
