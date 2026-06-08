@@ -28,6 +28,12 @@
   font-weight: var(--font-weight-semibold);
   transition: color var(--transition-base), transform var(--transition-base);
   flex: 1;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .nav-text {
