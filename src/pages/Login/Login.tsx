@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, googleProvider } from '../../firebase';
 import { Button, Icon, TextField, Toast } from '../../components/ui';
 import './Login.css';
 
-/**
- * 로그인 화면.
- * - Firebase Auth(Google)로 로그인 후 JWT 발급 → POST /api/auth/login
- * - 로그인 실패 시 에러 메시지를 보여줍니다.
- */
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -16,30 +13,36 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setLoading(true);
     setError('');
-    // TODO: 백엔드 연동 — Firebase Auth 팝업 → ID 토큰 → POST /api/auth/login
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await signInWithPopup(auth, googleProvider);
       setToast('환영해요! 오늘 하루도 기록해볼까요? 🌙');
       setTimeout(() => navigate('/'), 600);
-    }, 700);
+    } catch {
+      setError('Google 로그인에 실패했어요');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEmailLogin = () => {
+  const handleEmailLogin = async () => {
     if (!email.trim() || !password.trim()) {
       setError('이메일과 비밀번호를 입력해주세요');
       return;
     }
     setError('');
     setLoading(true);
-    // TODO: 백엔드 연동 — POST /api/auth/login
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       setToast('로그인되었어요');
       setTimeout(() => navigate('/'), 600);
-    }, 700);
+    } catch {
+      setError('이메일 또는 비밀번호가 올바르지 않아요');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
