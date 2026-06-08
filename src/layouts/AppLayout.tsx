@@ -21,7 +21,7 @@ const AppLayout = () => {
   return (
     <div className="app-container">
       <AppRoutes />
-      {!hideNav && <NavBar user={user ?? null} />}
+      {!hideNav && user !== undefined && <NavBar user={user} />}
     </div>
   );
 };
