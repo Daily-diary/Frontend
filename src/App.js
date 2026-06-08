@@ -2,8 +2,8 @@ import './App.css';
 import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { auth, googleProvider } from "./firebase";
-import MyPage from "./MyPage";
-import FriendPage from "./FriendPage";
+import MyPage from "./Mypage/MyPage";
+import FriendPage from "./FriendPage/FriendPage";
 
 function App() {
   const [user, setUser] = useState(null);

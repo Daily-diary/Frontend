@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
-import { auth } from "./firebase";
+import { auth } from "../firebase";
 import {
   getMyProfile,
   updateMyProfile,
   updateMyProfileImage,
-} from "./api";
+} from "../api";
 import "./MyPage.css";
 
 function MyPage({ onNavigate }) {

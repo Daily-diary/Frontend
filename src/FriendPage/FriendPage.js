@@ -9,7 +9,7 @@ import {
   rejectFriendRequest,
   cancelFriendRequest,
   removeFriend,
-} from "./api";
+} from "../api";
 import "./FriendPage.css";
 
 const TABS = [
