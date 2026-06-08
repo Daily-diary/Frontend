@@ -40,6 +40,18 @@
   font-size: 0.7rem;
 }
 
+.nav-item:hover {
+  color: var(--color-primary);
+}
+
+.nav-item:hover svg {
+  transform: translateY(-2px) scale(1.1);
+}
+
+.nav-item:active {
+  transform: scale(0.9);
+}
+
 .nav-item.active {
   color: var(--color-primary);
 }
