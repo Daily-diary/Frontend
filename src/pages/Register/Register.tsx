@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '../../firebase';
 import { Button, TextField, TopBar, Toast } from '../../components/ui';
 import '../Login/Login.css';
 
-/**
- * 신규 회원 등록 화면 (POST /api/auth/register)
- */
 const Register = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: '', email: '', password: '', passwordConfirm: '' });
@@ -27,15 +26,31 @@ const Register = () => {
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
     setLoading(true);
-    // TODO: 백엔드 연동 — POST /api/auth/register
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+      await updateProfile(credential.user, { displayName: form.username });
       setToast('회원가입이 완료되었어요! 환영해요 🎉');
+      await auth.signOut();
       setTimeout(() => navigate('/login'), 700);
-    }, 700);
+    } catch (e: any) {
+      console.error('회원가입 에러:', e.code, e.message);
+      if (e.code === 'auth/email-already-in-use') {
+        setErrors({ email: '이미 사용 중인 이메일이에요' });
+      } else if (e.code === 'auth/operation-not-allowed') {
+        setErrors({ email: '이메일/비밀번호 로그인이 비활성화되어 있어요 (Firebase 콘솔 확인 필요)' });
+      } else if (e.code === 'auth/weak-password') {
+        setErrors({ password: '비밀번호가 너무 약해요' });
+      } else if (e.code === 'auth/invalid-email') {
+        setErrors({ email: '올바른 이메일 형식이 아니에요' });
+      } else {
+        setErrors({ email: `오류: ${e.code ?? e.message}` });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

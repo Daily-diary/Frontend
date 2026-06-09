@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider } from '../../firebase';
-import { Button, Icon, TextField, Toast } from '../../components/ui';
+import { Button, Icon, TextField, Toast, TopBar } from '../../components/ui';
 import './Login.css';
 
 const Login = () => {
@@ -47,6 +47,7 @@ const Login = () => {
 
   return (
     <div className="auth-page">
+      <TopBar showBack title="" />
       <div className="auth-hero">
         <span className="auth-hero__emoji">📔</span>
         <h1 className="auth-hero__title">
