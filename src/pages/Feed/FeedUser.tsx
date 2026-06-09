@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Avatar, Icon, MoodTag, Spinner, TopBar, EmptyState } from '../../components/ui';
-import { MOCK_DIARIES, MOCK_USERS } from '../../api/mockData';
-import type { Diary, User } from '../../types/models';
+import { feedApi, type FeedItem } from '../../api/feedApi';
+import { userApi, type UserSearchResult } from '../../api/userApi';
 import './Feed.css';
 
 const formatDate = (dateStr: string) => {
@@ -10,28 +10,36 @@ const formatDate = (dateStr: string) => {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`;
 };
 
-/**
- * 특정 친구 피드 조회 (GET /api/feed/users/{userId})
- * 공개(is_public)된 일기만 노출됩니다.
- */
 const FeedUser = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null | undefined>(undefined);
-  const [diaries, setDiaries] = useState<Diary[]>([]);
+  const [user, setUser] = useState<UserSearchResult | null | undefined>(undefined);
+  const [diaries, setDiaries] = useState<FeedItem[]>([]);
 
   useEffect(() => {
-    const found = MOCK_USERS.find((u) => u.id === userId);
-    const timer = setTimeout(() => {
-      setUser(found ?? null);
-      setDiaries(MOCK_DIARIES.filter((d) => d.author.id === userId && d.isPublic));
-    }, 250);
-    return () => clearTimeout(timer);
+    if (!userId) return;
+    feedApi.getFriendFeed(userId)
+      .then((data) => {
+        setDiaries(data);
+        if (data.length > 0) {
+          setUser({
+            id: data[0].authorId,
+            nickname: data[0].authorName,
+            profileImageUrl: data[0].authorProfileImageUrl,
+            bio: null,
+            friendshipStatus: 'FRIEND',
+          });
+        } else {
+          userApi.search('').catch(() => {});
+          setUser(null);
+        }
+      })
+      .catch(() => setUser(null));
   }, [userId]);
 
   return (
     <div className="page">
-      <TopBar showBack title={user ? `${user.username}님의 피드` : '피드'} />
+      <TopBar showBack title={user ? `${user.nickname}님의 피드` : '피드'} />
 
       {user === undefined ? (
         <Spinner />
@@ -40,12 +48,12 @@ const FeedUser = () => {
       ) : (
         <>
           <section style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '20px var(--space-lg) 4px' }}>
-            <Avatar src={user.profileImageUrl} name={user.username} size={56} />
+            <Avatar src={user.profileImageUrl} name={user.nickname} size={56} />
             <div>
               <p style={{ fontWeight: 700, color: 'var(--color-text-strong)', fontSize: 'var(--font-size-md)' }}>
-                {user.username}
+                {user.nickname}
               </p>
-              <p className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>{user.bio}</p>
+              {user.bio && <p className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>{user.bio}</p>}
             </div>
           </section>
 
@@ -55,10 +63,10 @@ const FeedUser = () => {
             <main className="feed-list">
               {diaries.map((diary) => (
                 <article key={diary.id} className="feed-card fade-in" onClick={() => navigate(`/feed/${diary.id}`)} role="button">
-                  {diary.images.length > 0 && (
+                  {diary.imageUrls.length > 0 && (
                     <div className="feed-card-images">
-                      {diary.images.map((img) => (
-                        <img key={img.id} src={img.imageUrl} alt={diary.title} loading="lazy" />
+                      {diary.imageUrls.map((url, i) => (
+                        <img key={i} src={url} alt={diary.title} loading="lazy" />
                       ))}
                     </div>
                   )}

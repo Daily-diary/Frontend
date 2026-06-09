@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Icon, TextField, Toggle, TopBar, Toast } from '../../components/ui';
 import { MOODS } from '../../constants/moods';
-import { MY_DIARIES } from '../../api/mockData';
+import { diaryApi } from '../../api/diaryApi';
 import './DiaryWrite.css';
 
 interface ImageDraft {
@@ -15,11 +15,6 @@ const todayLabel = () => {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 };
 
-/**
- * 일기 작성 / 수정 화면.
- * - 작성: POST /api/diaries
- * - 수정: PUT /api/diaries/{id}  (id 파라미터가 있으면 수정 모드)
- */
 const DiaryWrite = () => {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
@@ -32,39 +27,55 @@ const DiaryWrite = () => {
   const [isPublic, setIsPublic] = useState(true);
   const [images, setImages] = useState<ImageDraft[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isEdit) return;
-    const existing = MY_DIARIES.find((d) => d.id === id);
-    if (existing) {
-      setTitle(existing.title);
-      setContent(existing.content);
-      setMood(existing.mood);
-      setIsPublic(existing.isPublic);
-      setImages(existing.images.map((img) => ({ id: img.id, url: img.imageUrl })));
-    }
+    if (!isEdit || !id) return;
+    diaryApi.getOne(id).then((d) => {
+      setTitle(d.title);
+      setContent(d.content);
+      setMood(d.mood);
+      setIsPublic(d.isPublic);
+      setImages(d.imageUrls.map((url, i) => ({ id: String(i), url })));
+    }).catch(() => {});
   }, [id, isEdit]);
 
   const handleAddImages = (files: FileList | null) => {
     if (!files) return;
     const drafts = Array.from(files)
       .slice(0, 5 - images.length)
-      .map((file) => ({ id: `${file.name}-${Date.now()}-${Math.random()}`, url: URL.createObjectURL(file) }));
+      .map((file) => ({ id: `${file.name}-${Date.now()}`, url: URL.createObjectURL(file) }));
     setImages((prev) => [...prev, ...drafts]);
   };
 
-  const handleRemoveImage = (imgId: string) => {
-    setImages((prev) => prev.filter((img) => img.id !== imgId));
-  };
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) {
       setToast('제목과 내용을 입력해주세요');
       return;
     }
-    // TODO: 백엔드 연동 — POST /api/diaries 또는 PUT /api/diaries/{id}
-    setToast(isEdit ? '일기를 수정했어요' : '오늘의 일기를 저장했어요 🌙');
-    setTimeout(() => navigate(isEdit ? `/diary/${id}` : '/'), 700);
+    setLoading(true);
+    try {
+      const data = {
+        title,
+        content,
+        mood,
+        isPublic,
+        imageUrls: images.map((img) => img.url),
+      };
+      if (isEdit && id) {
+        await diaryApi.update(id, data);
+        setToast('일기를 수정했어요');
+        setTimeout(() => navigate(`/diary/${id}`), 700);
+      } else {
+        const created = await diaryApi.create(data);
+        setToast('오늘의 일기를 저장했어요 🌙');
+        setTimeout(() => navigate(`/diary/${created.id}`), 700);
+      }
+    } catch {
+      setToast('저장에 실패했어요. 다시 시도해주세요');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,7 +84,7 @@ const DiaryWrite = () => {
         showBack
         title={isEdit ? '일기 수정' : '일기 쓰기'}
         right={
-          <Button size="sm" onClick={handleSubmit}>
+          <Button size="sm" onClick={handleSubmit} disabled={loading}>
             {isEdit ? '수정 완료' : '저장'}
           </Button>
         }
@@ -104,14 +115,14 @@ const DiaryWrite = () => {
           label="제목"
           placeholder="오늘 하루를 한 줄로 표현한다면?"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
         />
 
         <TextField
           label="내용"
           placeholder="오늘 있었던 일, 느낀 감정을 자유롭게 적어보세요"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => setContent((e.target as HTMLTextAreaElement).value)}
           multiline
         />
 
@@ -127,20 +138,13 @@ const DiaryWrite = () => {
             {images.map((img) => (
               <div key={img.id} className="image-uploader__thumb">
                 <img src={img.url} alt="diary" />
-                <button type="button" className="image-uploader__remove" onClick={() => handleRemoveImage(img.id)}>
+                <button type="button" className="image-uploader__remove" onClick={() => setImages((prev) => prev.filter((x) => x.id !== img.id))}>
                   <Icon name="close" size={13} color="#fff" />
                 </button>
               </div>
             ))}
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            hidden
-            onChange={(e) => handleAddImages(e.target.files)}
-          />
+          <input ref={fileInputRef} type="file" accept="image/*" multiple hidden onChange={(e) => handleAddImages(e.target.files)} />
         </div>
 
         <div className="write-toggle-row">
@@ -156,8 +160,8 @@ const DiaryWrite = () => {
           <Toggle checked={isPublic} onChange={setIsPublic} ariaLabel="공개 여부" />
         </div>
 
-        <Button fullWidth onClick={handleSubmit}>
-          {isEdit ? '수정 완료' : '일기 저장하기'}
+        <Button fullWidth onClick={handleSubmit} disabled={loading}>
+          {loading ? '저장 중...' : isEdit ? '수정 완료' : '일기 저장하기'}
         </Button>
       </div>
 

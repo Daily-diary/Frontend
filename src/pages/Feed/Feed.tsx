@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, Icon, MoodTag, Spinner, EmptyState } from '../../components/ui';
-import { MOCK_DIARIES, ME } from '../../api/mockData';
-import type { Diary } from '../../types/models';
+import { feedApi, type FeedItem } from '../../api/feedApi';
+import { userApi, type UserProfile } from '../../api/userApi';
 import './Feed.css';
 
 const formatDate = (dateStr: string) => {
@@ -10,18 +10,15 @@ const formatDate = (dateStr: string) => {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`;
 };
 
-/**
- * 친구 피드 조회 화면 (GET /api/feed)
- * TODO: 백엔드 연동 시 mock 데이터 대신 axios 호출로 교체
- */
 const Feed = () => {
-  const [feed, setFeed] = useState<Diary[] | null>(null);
+  const [feed, setFeed] = useState<FeedItem[] | null>(null);
+  const [me, setMe] = useState<UserProfile | null>(null);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
-    const timer = setTimeout(() => setFeed(MOCK_DIARIES), 300);
-    return () => clearTimeout(timer);
+    userApi.getMe().then(setMe).catch(() => {});
+    feedApi.getFeed().then(setFeed).catch(() => setFeed([]));
   }, []);
 
   const toggleLike = (id: string) => {
@@ -36,7 +33,7 @@ const Feed = () => {
   return (
     <div className="page">
       <section className="feed-hero">
-        <p className="feed-hero__greeting">{ME.username}님, 오늘 하루는 어땠나요?</p>
+        <p className="feed-hero__greeting">{me ? `${me.nickname}님, 오늘 하루는 어땠나요?` : '오늘 하루는 어땠나요?'}</p>
         <h1 className="feed-hero__title">
           친구들의 <span>오늘</span>을 들여다봐요
         </h1>
@@ -58,21 +55,21 @@ const Feed = () => {
               <article key={diary.id} className="feed-card fade-in">
                 <div
                   className="feed-card-header"
-                  onClick={() => navigate(`/feed/users/${diary.author.id}`)}
+                  onClick={() => navigate(`/feed/users/${diary.authorId}`)}
                   role="button"
                 >
-                  <Avatar src={diary.author.profileImageUrl} name={diary.author.username} size={42} />
+                  <Avatar src={diary.authorProfileImageUrl} name={diary.authorName} size={42} />
                   <div className="header-info">
-                    <span className="nickname">{diary.author.username}</span>
+                    <span className="nickname">{diary.authorName}</span>
                     <span className="date">{formatDate(diary.diaryDate)}</span>
                   </div>
                   <MoodTag mood={diary.mood} size="sm" />
                 </div>
 
-                {diary.images.length > 0 && (
+                {diary.imageUrls.length > 0 && (
                   <div className="feed-card-images" onClick={() => navigate(`/feed/${diary.id}`)} role="button">
-                    {diary.images.map((img) => (
-                      <img key={img.id} src={img.imageUrl} alt={diary.title} loading="lazy" />
+                    {diary.imageUrls.map((url, i) => (
+                      <img key={i} src={url} alt={diary.title} loading="lazy" />
                     ))}
                   </div>
                 )}

@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Avatar, Icon, MoodTag, Spinner, TopBar, EmptyState } from '../../components/ui';
-import { MOCK_DIARIES, MY_DIARIES } from '../../api/mockData';
-import type { Diary } from '../../types/models';
+import { feedApi, type FeedItem } from '../../api/feedApi';
 import './FeedDetail.css';
 
 const formatDate = (dateStr: string) => {
@@ -10,19 +9,15 @@ const formatDate = (dateStr: string) => {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 };
 
-/**
- * 친구 피드 상세 조회 (GET /api/feed/{diaryId})
- */
 const FeedDetail = () => {
   const { diaryId } = useParams<{ diaryId: string }>();
   const navigate = useNavigate();
-  const [diary, setDiary] = useState<Diary | null | undefined>(undefined);
+  const [diary, setDiary] = useState<FeedItem | null | undefined>(undefined);
   const [liked, setLiked] = useState(false);
 
   useEffect(() => {
-    const found = [...MOCK_DIARIES, ...MY_DIARIES].find((d) => d.id === diaryId);
-    const timer = setTimeout(() => setDiary(found ?? null), 250);
-    return () => clearTimeout(timer);
+    if (!diaryId) return;
+    feedApi.getFeedDetail(diaryId).then(setDiary).catch(() => setDiary(null));
   }, [diaryId]);
 
   return (
@@ -35,23 +30,19 @@ const FeedDetail = () => {
         <EmptyState icon={<Icon name="search" size={26} />} title="일기를 찾을 수 없어요" />
       ) : (
         <article className="fade-in">
-          {diary.images.length > 0 && (
+          {diary.imageUrls.length > 0 && (
             <div className="feed-detail__images">
-              {diary.images.map((img) => (
-                <img key={img.id} src={img.imageUrl} alt={diary.title} />
+              {diary.imageUrls.map((url, i) => (
+                <img key={i} src={url} alt={diary.title} />
               ))}
             </div>
           )}
 
           <div className="feed-detail__body">
-            <div
-              className="feed-detail__author"
-              onClick={() => navigate(`/feed/users/${diary.author.id}`)}
-              role="button"
-            >
-              <Avatar src={diary.author.profileImageUrl} name={diary.author.username} size={46} />
+            <div className="feed-detail__author" onClick={() => navigate(`/feed/users/${diary.authorId}`)} role="button">
+              <Avatar src={diary.authorProfileImageUrl} name={diary.authorName} size={46} />
               <div>
-                <p className="name">{diary.author.username}</p>
+                <p className="name">{diary.authorName}</p>
                 <p className="date">{formatDate(diary.diaryDate)}</p>
               </div>
               <div style={{ marginLeft: 'auto' }}>

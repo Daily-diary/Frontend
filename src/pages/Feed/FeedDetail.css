@@ -1,17 +1,15 @@
 @import '../../styles/tokens.css';
 
 .feed-detail__images {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  width: 100%;
+  background: var(--color-surface-alt);
 }
 
 .feed-detail__images img {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  flex-shrink: 0;
-  scroll-snap-align: start;
+  max-height: 340px;
   object-fit: cover;
+  display: block;
 }
 
 .feed-detail__body {
@@ -24,11 +22,13 @@
 .feed-detail__author {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 12px;
+  cursor: pointer;
 }
 
 .feed-detail__author .name {
-  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-strong);
 }
 
@@ -42,18 +42,19 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-strong);
+  line-height: 1.4;
 }
 
 .feed-detail__content {
   font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
   color: var(--color-text);
+  line-height: 1.75;
   white-space: pre-wrap;
 }
 
 .feed-detail__actions {
   display: flex;
-  gap: var(--space-md);
+  gap: 8px;
   padding-top: var(--space-sm);
   border-top: 1px solid var(--color-border);
 }
@@ -62,21 +63,24 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--color-primary-softer);
-  border: none;
+  padding: 9px 16px;
   border-radius: var(--radius-pill);
-  padding: 10px 18px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
-  transition: all var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.feed-detail__actions button:active,
+.feed-detail__actions button:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text-strong);
 }
 
 .feed-detail__actions button.liked {
-  background: var(--color-primary-soft);
-  color: var(--color-primary-strong);
-}
-
-.feed-detail__actions button:active {
-  transform: scale(0.95);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-softer);
 }

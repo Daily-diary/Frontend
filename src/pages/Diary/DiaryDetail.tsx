@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Avatar, BottomSheet, EmptyState, Icon, IconButton, MoodTag, Spinner, TopBar, Toast } from '../../components/ui';
-import { MY_DIARIES } from '../../api/mockData';
-import type { Diary } from '../../types/models';
+import { diaryApi, type DiaryItem } from '../../api/diaryApi';
+import { userApi, type UserProfile } from '../../api/userApi';
 import '../Feed/FeedDetail.css';
 import './DiaryDetail.css';
 
@@ -11,29 +11,31 @@ const formatDate = (dateStr: string) => {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 };
 
-/**
- * 내 일기 상세 조회 (GET /api/diaries/{id})
- * 수정(PUT) / 삭제(DELETE) 메뉴를 제공합니다.
- */
 const DiaryDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [diary, setDiary] = useState<Diary | null | undefined>(undefined);
+  const [diary, setDiary] = useState<DiaryItem | null | undefined>(undefined);
+  const [me, setMe] = useState<UserProfile | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
-    const found = MY_DIARIES.find((d) => d.id === id);
-    const timer = setTimeout(() => setDiary(found ?? null), 200);
-    return () => clearTimeout(timer);
+    if (!id) return;
+    userApi.getMe().then(setMe).catch(() => {});
+    diaryApi.getOne(id).then(setDiary).catch(() => setDiary(null));
   }, [id]);
 
-  const handleDelete = () => {
-    // TODO: 백엔드 연동 — DELETE /api/diaries/{id}
-    setConfirmOpen(false);
-    setToast('일기를 삭제했어요');
-    setTimeout(() => navigate('/mypage'), 600);
+  const handleDelete = async () => {
+    if (!id) return;
+    try {
+      await diaryApi.delete(id);
+      setConfirmOpen(false);
+      setToast('일기를 삭제했어요');
+      setTimeout(() => navigate('/mypage'), 600);
+    } catch {
+      setToast('삭제에 실패했어요');
+    }
   };
 
   return (
@@ -50,24 +52,24 @@ const DiaryDetail = () => {
         <EmptyState icon={<Icon name="search" size={26} />} title="일기를 찾을 수 없어요" />
       ) : (
         <article className="fade-in">
-          {diary.images.length > 0 && (
+          {diary.imageUrls.length > 0 && (
             <div className="feed-detail__images">
-              {diary.images.map((img) => (
-                <img key={img.id} src={img.imageUrl} alt={diary.title} />
+              {diary.imageUrls.map((url, i) => (
+                <img key={i} src={url} alt={diary.title} />
               ))}
             </div>
           )}
 
           <div className="feed-detail__body">
             <div className="feed-detail__author">
-              <Avatar src={diary.author.profileImageUrl} name={diary.author.username} size={46} />
+              <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={46} />
               <div>
-                <p className="name">{diary.author.username}</p>
+                <p className="name">{me?.nickname}</p>
                 <p className="date">{formatDate(diary.diaryDate)}</p>
               </div>
               <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, alignItems: 'center' }}>
                 <MoodTag mood={diary.mood} />
-                <span className="text-muted" title={diary.isPublic ? '친구에게 공개' : '나만 보기'}>
+                <span className="text-muted">
                   <Icon name={diary.isPublic ? 'globe' : 'lock'} size={16} />
                 </span>
               </div>
@@ -85,13 +87,7 @@ const DiaryDetail = () => {
             <Icon name="edit" size={18} />
             일기 수정하기
           </button>
-          <button
-            className="diary-detail__menu-item diary-detail__menu-item--danger"
-            onClick={() => {
-              setMenuOpen(false);
-              setConfirmOpen(true);
-            }}
-          >
+          <button className="diary-detail__menu-item diary-detail__menu-item--danger" onClick={() => { setMenuOpen(false); setConfirmOpen(true); }}>
             <Icon name="trash" size={18} />
             일기 삭제하기
           </button>
@@ -107,15 +103,8 @@ const DiaryDetail = () => {
             삭제한 일기는 복구할 수 없어요
           </p>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              className="btn btn--outline btn--full"
-              onClick={() => setConfirmOpen(false)}
-            >
-              취소
-            </button>
-            <button className="btn btn--danger btn--full" style={{ background: 'var(--color-danger)', color: '#fff', border: 'none' }} onClick={handleDelete}>
-              삭제
-            </button>
+            <button className="btn btn--outline btn--full" onClick={() => setConfirmOpen(false)}>취소</button>
+            <button className="btn btn--danger btn--full" style={{ background: 'var(--color-danger)', color: '#fff', border: 'none' }} onClick={handleDelete}>삭제</button>
           </div>
         </div>
       </BottomSheet>
