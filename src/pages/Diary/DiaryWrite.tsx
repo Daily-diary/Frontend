@@ -71,8 +71,17 @@ const DiaryWrite = () => {
         setToast('오늘의 일기를 저장했어요 🌙');
         setTimeout(() => navigate(`/diary/${created.id}`), 700);
       }
-    } catch {
-      setToast('저장에 실패했어요. 다시 시도해주세요');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      const msg = error?.response?.data?.message ?? error?.message ?? '알 수 없는 오류';
+      console.error('[DiaryWrite] save error', status, msg, error);
+      if (status === 401) {
+        setToast('로그인이 필요해요');
+      } else if (status === 408 || error?.code === 'ECONNABORTED') {
+        setToast('서버 응답이 너무 늦어요. 잠시 후 다시 시도해주세요');
+      } else {
+        setToast('저장에 실패했어요. 다시 시도해주세요');
+      }
     } finally {
       setLoading(false);
     }
