@@ -12,6 +12,7 @@ export interface UserSearchResult {
   id: string;
   nickname: string;
   profileImageUrl: string | null;
+  bio?: string | null;
   friendshipStatus: 'FRIEND' | 'SENT' | 'RECEIVED' | 'NONE';
 }
 

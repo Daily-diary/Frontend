@@ -2,16 +2,18 @@ import axios from 'axios';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 
 const client = axios.create({
   baseURL: BASE_URL,
   timeout: 60000,
 });
 
-// Firebase 인증 상태 초기화 완료까지 기다리는 Promise
+// Firebase 인증 상태 초기화 완료까지 기다리는 Promise (최대 5초 대기)
 const authReady = new Promise<void>((resolve) => {
+  const timer = setTimeout(resolve, 5000);
   const unsubscribe = onAuthStateChanged(auth, () => {
+    clearTimeout(timer);
     unsubscribe();
     resolve();
   });
