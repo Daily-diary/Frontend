@@ -5,7 +5,6 @@ export interface FriendItem {
   userId: string;
   nickname: string;
   profileImageUrl: string | null;
-  bio: string | null;
 }
 
 export interface FriendRequest {

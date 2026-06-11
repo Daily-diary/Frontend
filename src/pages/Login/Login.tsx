@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider } from '../../firebase';
 import { Button, Icon, TextField, Toast, TopBar } from '../../components/ui';
 import './Login.css';
@@ -13,13 +13,20 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      if (u) navigate('/feed', { replace: true });
+    });
+    return unsubscribe;
+  }, [navigate]);
+
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError('');
     try {
       await signInWithPopup(auth, googleProvider);
       setToast('환영해요! 오늘 하루도 기록해볼까요? 🌙');
-      setTimeout(() => navigate('/'), 600);
+      setTimeout(() => navigate('/feed'), 600);
     } catch {
       setError('Google 로그인에 실패했어요');
     } finally {
@@ -37,7 +44,7 @@ const Login = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setToast('로그인되었어요');
-      setTimeout(() => navigate('/'), 600);
+      setTimeout(() => navigate('/feed'), 600);
     } catch {
       setError('이메일 또는 비밀번호가 올바르지 않아요');
     } finally {
@@ -47,7 +54,7 @@ const Login = () => {
 
   return (
     <div className="auth-page">
-      <TopBar showBack title="" />
+      <TopBar title="" />
       <div className="auth-hero">
         <span className="auth-hero__emoji">📔</span>
         <h1 className="auth-hero__title">

@@ -106,7 +106,6 @@ const Friend = () => {
                 <Avatar src={f.profileImageUrl} name={f.nickname} size={48} />
                 <div className="friend-row__info">
                   <p className="friend-row__name">{f.nickname}</p>
-                  <p className="friend-row__bio">{f.bio}</p>
                 </div>
                 <div className="friend-row__actions">
                   <Button size="sm" variant="ghost" onClick={() => handleRemoveFriend(f)}>삭제</Button>
@@ -153,7 +152,6 @@ const Friend = () => {
                 <Avatar src={u.profileImageUrl} name={u.nickname} size={48} />
                 <div className="friend-row__info">
                   <p className="friend-row__name">{u.nickname}</p>
-                  <p className="friend-row__bio">{u.bio}</p>
                 </div>
                 <div className="friend-row__actions">
                   {u.friendshipStatus === 'FRIEND' ? (
