@@ -13,7 +13,6 @@ const formatDate = (dateStr: string) => {
 const Feed = () => {
   const [feed, setFeed] = useState<FeedItem[] | null>(null);
   const [me, setMe] = useState<UserProfile | null>(null);
-  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,13 +20,19 @@ const Feed = () => {
     feedApi.getFeed().then(setFeed).catch(() => setFeed([]));
   }, []);
 
-  const toggleLike = (id: string) => {
-    setLikedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const toggleLike = async (diary: FeedItem) => {
+    try {
+      const { liked } = await feedApi.toggleLike(diary.id);
+      setFeed(prev =>
+        prev?.map(d =>
+          d.id === diary.id
+            ? { ...d, liked, likeCount: liked ? d.likeCount + 1 : d.likeCount - 1 }
+            : d
+        ) ?? prev
+      );
+    } catch {
+      // ignore
+    }
   };
 
   return (
@@ -49,49 +54,46 @@ const Feed = () => {
         />
       ) : (
         <main className="feed-list">
-          {feed.map((diary) => {
-            const liked = likedIds.has(diary.id);
-            return (
-              <article key={diary.id} className="feed-card fade-in">
-                <div
-                  className="feed-card-header"
-                  onClick={() => navigate(`/feed/users/${diary.authorId}`)}
-                  role="button"
-                >
-                  <Avatar src={diary.authorProfileImageUrl} name={diary.authorName} size={42} />
-                  <div className="header-info">
-                    <span className="nickname">{diary.authorName}</span>
-                    <span className="date">{formatDate(diary.diaryDate)}</span>
-                  </div>
-                  <MoodTag mood={diary.mood} size="sm" />
+          {feed.map((diary) => (
+            <article key={diary.id} className="feed-card fade-in">
+              <div
+                className="feed-card-header"
+                onClick={() => navigate(`/feed/users/${diary.authorId}`)}
+                role="button"
+              >
+                <Avatar src={diary.authorProfileImageUrl} name={diary.authorName} size={42} />
+                <div className="header-info">
+                  <span className="nickname">{diary.authorName}</span>
+                  <span className="date">{formatDate(diary.diaryDate)}</span>
                 </div>
+                <MoodTag mood={diary.mood} size="sm" />
+              </div>
 
-                {diary.imageUrls.length > 0 && (
-                  <div className="feed-card-images" onClick={() => navigate(`/feed/${diary.id}`)} role="button">
-                    {diary.imageUrls.map((url, i) => (
-                      <img key={i} src={url} alt={diary.title} loading="lazy" />
-                    ))}
-                  </div>
-                )}
-
-                <div className="feed-card-body" onClick={() => navigate(`/feed/${diary.id}`)} role="button">
-                  <p className="feed-card-title">{diary.title}</p>
-                  <p className="feed-card-content">{diary.content}</p>
+              {diary.imageUrls.length > 0 && (
+                <div className="feed-card-images" onClick={() => navigate(`/feed/${diary.id}`)} role="button">
+                  {diary.imageUrls.map((url, i) => (
+                    <img key={i} src={url} alt={diary.title} loading="lazy" />
+                  ))}
                 </div>
+              )}
 
-                <div className="feed-card-actions">
-                  <button className={liked ? 'liked' : ''} onClick={() => toggleLike(diary.id)}>
-                    <Icon name={liked ? 'heart-filled' : 'heart'} size={19} />
-                    공감
-                  </button>
-                  <button onClick={() => navigate(`/feed/${diary.id}`)}>
-                    <Icon name="message" size={19} />
-                    이야기 나누기
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+              <div className="feed-card-body" onClick={() => navigate(`/feed/${diary.id}`)} role="button">
+                <p className="feed-card-title">{diary.title}</p>
+                <p className="feed-card-content">{diary.content}</p>
+              </div>
+
+              <div className="feed-card-actions">
+                <button className={diary.liked ? 'liked' : ''} onClick={() => toggleLike(diary)}>
+                  <Icon name={diary.liked ? 'heart-filled' : 'heart'} size={19} />
+                  공감{diary.likeCount > 0 && ` ${diary.likeCount}`}
+                </button>
+                <button onClick={() => navigate(`/feed/${diary.id}`)}>
+                  <Icon name="message" size={19} />
+                  이야기 나누기{diary.commentCount > 0 && ` ${diary.commentCount}`}
+                </button>
+              </div>
+            </article>
+          ))}
         </main>
       )}
     </div>
