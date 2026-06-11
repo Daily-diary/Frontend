@@ -1,11 +1,11 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signOut, type User } from 'firebase/auth';
 import { auth } from '../firebase';
 import Icon from './ui/Icon';
 import '../styles/NavBar.css';
 
 const NAV_ITEMS = [
-  { to: '/', label: '피드', icon: 'home' as const },
+  { to: '/feed', label: '피드', icon: 'home' as const },
   { to: '/friend', label: '친구', icon: 'users' as const },
 ];
 
@@ -15,6 +15,7 @@ interface NavBarProps {
 
 const NavBar = ({ user }: NavBarProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isMyPage = location.pathname.startsWith('/mypage');
   const isLogin = location.pathname.startsWith('/login');
 
@@ -40,7 +41,7 @@ const NavBar = ({ user }: NavBarProps) => {
       </Link>
 
       {user ? (
-        <button className="nav-item" onClick={() => signOut(auth)}>
+        <button className="nav-item" onClick={() => signOut(auth).then(() => navigate('/login'))}>
           <Icon name="logout" size={22} strokeWidth={1.7} />
           <span className="nav-text">로그아웃</span>
         </button>
