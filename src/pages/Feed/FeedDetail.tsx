@@ -5,15 +5,9 @@ import { feedApi, type FeedItem, type CommentItem } from '../../api/feedApi';
 import { userApi, type UserProfile } from '../../api/userApi';
 import './FeedDetail.css';
 
-const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
-};
-
-const formatCommentDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-};
+import { formatDateKST, formatCommentDateKST } from '../../utils/dateUtils';
+const formatDate = formatDateKST;
+const formatCommentDate = formatCommentDateKST;
 
 const FeedDetail = () => {
   const { diaryId } = useParams<{ diaryId: string }>();

@@ -1,30 +1,56 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Avatar, BottomSheet, EmptyState, Icon, IconButton, MoodTag, Spinner, TopBar, Toast } from '../../components/ui';
 import { diaryApi, type DiaryItem } from '../../api/diaryApi';
+import { feedApi, type CommentItem } from '../../api/feedApi';
 import { userApi, type UserProfile } from '../../api/userApi';
+import { formatDateKST, formatCommentDateKST } from '../../utils/dateUtils';
 import '../Feed/FeedDetail.css';
 import './DiaryDetail.css';
-
-const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
-};
 
 const DiaryDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [diary, setDiary] = useState<DiaryItem | null | undefined>(undefined);
   const [me, setMe] = useState<UserProfile | null>(null);
+  const [comments, setComments] = useState<CommentItem[]>([]);
+  const [commentText, setCommentText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!id) return;
     userApi.getMe().then(setMe).catch(() => {});
     diaryApi.getOne(id).then(setDiary).catch(() => setDiary(null));
+    feedApi.getComments(id).then(setComments).catch(() => {});
   }, [id]);
+
+  const handleAddComment = async () => {
+    if (!id || !commentText.trim() || submitting) return;
+    setSubmitting(true);
+    try {
+      const newComment = await feedApi.addComment(id, commentText.trim());
+      setComments(prev => [...prev, newComment]);
+      setCommentText('');
+    } catch {
+      setToast('댓글 작성에 실패했어요');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!id) return;
+    try {
+      await feedApi.deleteComment(id, commentId);
+      setComments(prev => prev.filter(c => c.id !== commentId));
+    } catch {
+      setToast('댓글 삭제에 실패했어요');
+    }
+  };
 
   const handleDelete = async () => {
     if (!id) return;
@@ -39,7 +65,7 @@ const DiaryDetail = () => {
   };
 
   return (
-    <div className="page page--no-nav">
+    <div className="page">
       <TopBar
         showBack
         title="내 일기"
@@ -57,7 +83,7 @@ const DiaryDetail = () => {
               <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={46} />
               <div>
                 <p className="name">{me?.nickname}</p>
-                <p className="date">{formatDate(diary.diaryDate)}</p>
+                <p className="date">{formatDateKST(diary.diaryDate)}</p>
               </div>
               <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, alignItems: 'center' }}>
                 <MoodTag mood={diary.mood} />
@@ -80,6 +106,63 @@ const DiaryDetail = () => {
 
           <div className="feed-detail__body">
             <p className="feed-detail__content">{diary.content}</p>
+
+            <div className="feed-detail__actions">
+              <button onClick={() => { inputRef.current?.focus(); inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}>
+                <Icon name="message" size={18} />
+                이야기 남기기{comments.length > 0 && ` ${comments.length}`}
+              </button>
+            </div>
+          </div>
+
+          <div className="feed-detail__comments">
+            <p className="feed-detail__comments-title">이야기 나누기</p>
+
+            {comments.length === 0 ? (
+              <p className="feed-detail__comments-empty">아직 이야기가 없어요. 첫 번째로 남겨보세요!</p>
+            ) : (
+              <ul className="feed-detail__comment-list">
+                {comments.map(c => (
+                  <li key={c.id} className="feed-detail__comment-item">
+                    <Avatar src={c.authorProfileImageUrl} name={c.authorName} size={34} />
+                    <div className="feed-detail__comment-bubble">
+                      <span className="feed-detail__comment-author">{c.authorName}</span>
+                      <p className="feed-detail__comment-content">{c.content}</p>
+                      <span className="feed-detail__comment-date">{formatCommentDateKST(c.createdAt)}</span>
+                    </div>
+                    {me?.id === c.authorId && (
+                      <button
+                        className="feed-detail__comment-delete"
+                        onClick={() => handleDeleteComment(c.id)}
+                        aria-label="삭제"
+                      >
+                        <Icon name="close" size={14} />
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="feed-detail__comment-input">
+              <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={34} />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="따뜻한 이야기를 남겨보세요"
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleAddComment(); }}
+                maxLength={300}
+              />
+              <button
+                className="feed-detail__comment-send"
+                onClick={handleAddComment}
+                disabled={!commentText.trim() || submitting}
+              >
+                <Icon name="send" size={18} />
+              </button>
+            </div>
           </div>
         </article>
       )}

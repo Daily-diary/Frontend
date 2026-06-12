@@ -5,10 +5,8 @@ import { feedApi, type FeedItem } from '../../api/feedApi';
 import { userApi, type UserSearchResult } from '../../api/userApi';
 import './Feed.css';
 
-const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
-};
+import { formatDateKST } from '../../utils/dateUtils';
+const formatDate = formatDateKST;
 
 const FeedUser = () => {
   const { userId } = useParams<{ userId: string }>();
