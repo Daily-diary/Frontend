@@ -52,14 +52,6 @@ const DiaryDetail = () => {
         <EmptyState icon={<Icon name="search" size={26} />} title="일기를 찾을 수 없어요" />
       ) : (
         <article className="fade-in">
-          {diary.imageUrls.length > 0 && (
-            <div className="feed-detail__images">
-              {diary.imageUrls.map((url, i) => (
-                <img key={i} src={url} alt={diary.title} />
-              ))}
-            </div>
-          )}
-
           <div className="feed-detail__body">
             <div className="feed-detail__author">
               <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={46} />
@@ -76,6 +68,17 @@ const DiaryDetail = () => {
             </div>
 
             <h2 className="feed-detail__title">{diary.title}</h2>
+          </div>
+
+          {diary.imageUrls.length > 0 && (
+            <div className="feed-detail__images">
+              {diary.imageUrls.map((url, i) => (
+                <img key={i} src={url} alt={diary.title} />
+              ))}
+            </div>
+          )}
+
+          <div className="feed-detail__body">
             <p className="feed-detail__content">{diary.content}</p>
           </div>
         </article>
