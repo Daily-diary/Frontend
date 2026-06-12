@@ -8,6 +8,7 @@ import './DiaryWrite.css';
 interface ImageDraft {
   id: string;
   url: string;
+  file?: File;
 }
 
 const todayLabel = () => {
@@ -46,8 +47,22 @@ const DiaryWrite = () => {
     if (!files) return;
     const drafts = Array.from(files)
       .slice(0, 5 - images.length)
-      .map((file) => ({ id: `${file.name}-${Date.now()}`, url: URL.createObjectURL(file) }));
+      .map((file) => ({ id: `${file.name}-${Date.now()}`, url: URL.createObjectURL(file), file }));
     setImages((prev) => [...prev, ...drafts]);
+  };
+
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    return data.secure_url;
   };
 
   const handleSubmit = async () => {
@@ -57,12 +72,15 @@ const DiaryWrite = () => {
     }
     setLoading(true);
     try {
+      const imageUrls = await Promise.all(
+        images.map((img) => img.file ? uploadToCloudinary(img.file) : Promise.resolve(img.url))
+      );
       const data = {
         title,
         content,
         mood,
         isPublic,
-        imageUrls: images.map((img) => img.url),
+        imageUrls,
         ...(isEdit && originalDiaryDate ? { diaryDate: originalDiaryDate } : {}),
       };
       if (isEdit && id) {
