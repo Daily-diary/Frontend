@@ -71,7 +71,7 @@ const FeedDetail = () => {
   };
 
   return (
-    <div className="page page--no-nav">
+    <div className="page">
       <TopBar showBack title="일기" />
 
       {diary === undefined ? (
@@ -108,7 +108,7 @@ const FeedDetail = () => {
                 <Icon name={diary.liked ? 'heart-filled' : 'heart'} size={18} />
                 공감{diary.likeCount > 0 && ` ${diary.likeCount}`}
               </button>
-              <button onClick={() => inputRef.current?.focus()}>
+              <button onClick={() => { inputRef.current?.focus(); inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}>
                 <Icon name="message" size={18} />
                 이야기 남기기{diary.commentCount > 0 && ` ${diary.commentCount}`}
               </button>
