@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, TopBar, IconButton, Spinner } from '../../components/ui';
+import { Avatar, TopBar, IconButton, Spinner, Icon } from '../../components/ui';
 import { userApi, type UserProfile } from '../../api/userApi';
 import { diaryApi, type DiaryItem } from '../../api/diaryApi';
 import { friendApi, type FriendItem } from '../../api/friendApi';
@@ -15,7 +15,27 @@ const MyPage = () => {
   const [friends, setFriends] = useState<FriendItem[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>('grid');
   const [loading, setLoading] = useState(true);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const url = URL.createObjectURL(file);
+      const updated = await userApi.updateProfileImage(url);
+      setMe(updated);
+      setProfileModalOpen(false);
+    } catch {
+      // silent
+    } finally {
+      setUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
 
   useEffect(() => {
     Promise.all([
@@ -24,7 +44,7 @@ const MyPage = () => {
       friendApi.getFriends(),
     ]).then(([user, myDiaries, myFriends]) => {
       setMe(user);
-      setDiaries(myDiaries);
+      setDiaries([...myDiaries].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
       setFriends(myFriends);
     }).finally(() => setLoading(false));
   }, []);
@@ -41,7 +61,12 @@ const MyPage = () => {
       <div className="profile-header-bg" />
 
       <div className="profile-card">
-        <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={72} />
+        <div className="profile-avatar-wrapper" onClick={() => setProfileModalOpen(true)}>
+          <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={72} />
+          <div className="profile-avatar-edit-badge">
+            <Icon name="camera" size={13} color="#fff" />
+          </div>
+        </div>
         <h2 className="profile-name">{me?.nickname}</h2>
         <p className="profile-bio">{me?.bio ?? '한 줄 소개를 추가해보세요'}</p>
 
@@ -98,6 +123,28 @@ const MyPage = () => {
           </div>
         )
       )}
+      {profileModalOpen && (
+        <div className="profile-photo-modal" onClick={() => setProfileModalOpen(false)}>
+          <div className="profile-photo-modal__card" onClick={e => e.stopPropagation()}>
+            <button className="profile-photo-modal__close" onClick={() => setProfileModalOpen(false)}>
+              <Icon name="close" size={20} />
+            </button>
+            <div className="profile-photo-modal__image">
+              <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={130} />
+            </div>
+            <p className="profile-photo-modal__name">{me?.nickname}</p>
+            <button
+              className="profile-photo-modal__change"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+            >
+              <Icon name="camera" size={16} color="#fff" />
+              {uploadingPhoto ? '변경 중...' : '사진 변경'}
+            </button>
+          </div>
+        </div>
+      )}
+      <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleProfileImageChange} />
     </div>
   );
 };

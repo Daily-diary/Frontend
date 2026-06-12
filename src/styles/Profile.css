@@ -153,3 +153,117 @@
   font-weight: 600;
   color: #333;
 }
+
+/* Profile avatar clickable wrapper */
+.profile-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.profile-avatar-edit-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 24px;
+  height: 24px;
+  background: var(--color-primary, #f4829e);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  pointer-events: none;
+}
+
+/* Profile photo modal */
+.profile-photo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: modal-fade-in 0.15s ease;
+}
+
+.profile-photo-modal__card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 36px 28px 28px;
+  width: 280px;
+  text-align: center;
+  position: relative;
+  animation: modal-slide-up 0.2s ease;
+}
+
+.profile-photo-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #bbb;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.15s;
+}
+
+.profile-photo-modal__close:hover {
+  color: #555;
+}
+
+.profile-photo-modal__image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.profile-photo-modal__name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 22px;
+}
+
+.profile-photo-modal__change {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--color-primary, #f4829e);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.2s;
+}
+
+.profile-photo-modal__change:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-photo-modal__change:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-slide-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
