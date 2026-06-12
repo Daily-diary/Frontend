@@ -17,7 +17,9 @@ const Feed = () => {
 
   useEffect(() => {
     userApi.getMe().then(setMe).catch(() => {});
-    feedApi.getFeed().then(setFeed).catch(() => setFeed([]));
+    feedApi.getFeed()
+      .then(data => setFeed([...data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())))
+      .catch(() => setFeed([]));
   }, []);
 
   const toggleLike = async (diary: FeedItem) => {

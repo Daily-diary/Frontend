@@ -28,6 +28,7 @@ const DiaryWrite = () => {
   const [images, setImages] = useState<ImageDraft[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [originalDiaryDate, setOriginalDiaryDate] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!isEdit || !id) return;
@@ -37,6 +38,7 @@ const DiaryWrite = () => {
       setMood(d.mood);
       setIsPublic(d.isPublic);
       setImages(d.imageUrls.map((url, i) => ({ id: String(i), url })));
+      setOriginalDiaryDate(d.diaryDate);
     }).catch(() => {});
   }, [id, isEdit]);
 
@@ -61,6 +63,7 @@ const DiaryWrite = () => {
         mood,
         isPublic,
         imageUrls: images.map((img) => img.url),
+        ...(isEdit && originalDiaryDate ? { diaryDate: originalDiaryDate } : {}),
       };
       if (isEdit && id) {
         await diaryApi.update(id, data);

@@ -20,7 +20,8 @@ const FeedUser = () => {
     if (!userId) return;
     feedApi.getFriendFeed(userId)
       .then((data) => {
-        setDiaries(data);
+        const sorted = [...data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setDiaries(sorted);
         if (data.length > 0) {
           setUser({
             id: data[0].authorId,
