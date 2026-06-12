@@ -224,6 +224,7 @@ git pull origin develop
 feat: 일기 작성 기능 구현
 fix: 친구 요청 오류 수정
 design: 로그인 페이지 UI 개선 
+docx: 리드미 수정
 ```
 
 Happy Coding 🚀
