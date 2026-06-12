@@ -33,12 +33,21 @@ const MyPage = () => {
     if (!file) return;
     setUploadingPhoto(true);
     try {
-      const url = URL.createObjectURL(file);
-      const updated = await userApi.updateProfileImage(url);
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const json = await res.json();
+      const updated = await userApi.updateProfileImage(json.secure_url);
       setMe(updated);
       setProfileModalOpen(false);
     } catch {
-      // silent
+      setToast('사진 업로드에 실패했어요');
     } finally {
       setUploadingPhoto(false);
       e.target.value = '';
