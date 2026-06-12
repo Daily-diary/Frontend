@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Avatar, Button, Chip, EmptyState, Icon, TopBar, Toast, Spinner } from '../../components/ui';
 import { friendApi, type FriendItem, type FriendRequest } from '../../api/friendApi';
 import { userApi, type UserSearchResult } from '../../api/userApi';
@@ -13,6 +14,7 @@ const TABS: { key: Tab; label: string }[] = [
 ];
 
 const Friend = () => {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('friends');
   const [friends, setFriends] = useState<FriendItem[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
@@ -102,13 +104,13 @@ const Friend = () => {
         ) : (
           <ul className="friend-list">
             {friends.map((f) => (
-              <li key={f.userId} className="friend-row fade-in">
+              <li key={f.userId} className="friend-row fade-in" onClick={() => navigate(`/feed/users/${f.userId}`)} style={{ cursor: 'pointer' }}>
                 <Avatar src={f.profileImageUrl} name={f.nickname} size={48} />
                 <div className="friend-row__info">
                   <p className="friend-row__name">{f.nickname}</p>
                 </div>
                 <div className="friend-row__actions">
-                  <Button size="sm" variant="ghost" onClick={() => handleRemoveFriend(f)}>삭제</Button>
+                  <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleRemoveFriend(f); }}>삭제</Button>
                 </div>
               </li>
             ))}
