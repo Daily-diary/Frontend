@@ -101,7 +101,10 @@ const MyPage = () => {
               const m = getMood(diary.mood);
               return (
                 <div key={diary.id} className="grid-tile" style={{ backgroundColor: m.bgVar }} onClick={() => navigate(`/diary/${diary.id}`)}>
-                  <span className="tile-emoji">{m.emoji}</span>
+                  {diary.imageUrls.length > 0
+                    ? <img src={diary.imageUrls[0]} alt={diary.title} className="tile-image" />
+                    : <span className="tile-emoji">{m.emoji}</span>
+                  }
                 </div>
               );
             })}
