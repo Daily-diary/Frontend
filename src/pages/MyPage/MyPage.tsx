@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, TopBar, IconButton, Spinner } from '../../components/ui';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase';
+import { Avatar, TopBar, IconButton, Spinner, Icon, TextField, Button, Toast } from '../../components/ui';
 import { userApi, type UserProfile } from '../../api/userApi';
 import { diaryApi, type DiaryItem } from '../../api/diaryApi';
 import { friendApi, type FriendItem } from '../../api/friendApi';
@@ -15,7 +17,82 @@ const MyPage = () => {
   const [friends, setFriends] = useState<FriendItem[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>('grid');
   const [loading, setLoading] = useState(true);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [nickname, setNickname] = useState('');
+  const [bio, setBio] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const json = await res.json();
+      const updated = await userApi.updateProfileImage(json.secure_url);
+      setMe(updated);
+      setProfileModalOpen(false);
+    } catch {
+      setToast('사진 업로드에 실패했어요');
+    } finally {
+      setUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
+
+  const openSettings = () => {
+    setNickname(me?.nickname ?? '');
+    setBio(me?.bio ?? '');
+    setDeleteConfirm(false);
+    setSettingsOpen(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!nickname.trim()) {
+      setToast('닉네임을 입력해주세요');
+      return;
+    }
+    setSaving(true);
+    try {
+      const updated = await userApi.updateProfile(nickname.trim(), bio.trim());
+      setMe(updated);
+      setSettingsOpen(false);
+      setToast('프로필이 저장되었어요');
+    } catch {
+      setToast('저장에 실패했어요');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deleteConfirm) {
+      setDeleteConfirm(true);
+      return;
+    }
+    try {
+      await userApi.deleteMe();
+      await signOut(auth);
+      navigate('/login', { replace: true });
+    } catch {
+      setToast('회원탈퇴에 실패했어요');
+      setDeleteConfirm(false);
+    }
+  };
 
   useEffect(() => {
     Promise.all([
@@ -24,7 +101,7 @@ const MyPage = () => {
       friendApi.getFriends(),
     ]).then(([user, myDiaries, myFriends]) => {
       setMe(user);
-      setDiaries(myDiaries);
+      setDiaries([...myDiaries].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
       setFriends(myFriends);
     }).finally(() => setLoading(false));
   }, []);
@@ -35,13 +112,18 @@ const MyPage = () => {
     <div className="profile-container">
       <TopBar
         title="마이페이지"
-        right={<IconButton icon="settings" aria-label="설정" onClick={() => {}} />}
+        right={<IconButton icon="settings" aria-label="설정" onClick={openSettings} />}
       />
 
       <div className="profile-header-bg" />
 
       <div className="profile-card">
-        <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={72} />
+        <div className="profile-avatar-wrapper" onClick={() => setProfileModalOpen(true)}>
+          <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={72} />
+          <div className="profile-avatar-edit-badge">
+            <Icon name="camera" size={13} color="#fff" />
+          </div>
+        </div>
         <h2 className="profile-name">{me?.nickname}</h2>
         <p className="profile-bio">{me?.bio ?? '한 줄 소개를 추가해보세요'}</p>
 
@@ -76,7 +158,10 @@ const MyPage = () => {
               const m = getMood(diary.mood);
               return (
                 <div key={diary.id} className="grid-tile" style={{ backgroundColor: m.bgVar }} onClick={() => navigate(`/diary/${diary.id}`)}>
-                  <span className="tile-emoji">{m.emoji}</span>
+                  {diary.imageUrls.length > 0
+                    ? <img src={diary.imageUrls[0]} alt={diary.title} className="tile-image" />
+                    : <span className="tile-emoji">{m.emoji}</span>
+                  }
                 </div>
               );
             })}
@@ -98,6 +183,81 @@ const MyPage = () => {
           </div>
         )
       )}
+
+      {/* 프로필 사진 모달 */}
+      {profileModalOpen && (
+        <div className="profile-photo-modal" onClick={() => setProfileModalOpen(false)}>
+          <div className="profile-photo-modal__card" onClick={e => e.stopPropagation()}>
+            <button className="profile-photo-modal__close" onClick={() => setProfileModalOpen(false)}>
+              <Icon name="close" size={20} />
+            </button>
+            <div className="profile-photo-modal__image">
+              <Avatar src={me?.profileImageUrl ?? null} name={me?.nickname ?? ''} size={130} />
+            </div>
+            <p className="profile-photo-modal__name">{me?.nickname}</p>
+            <button
+              className="profile-photo-modal__change"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+            >
+              <Icon name="camera" size={16} color="#fff" />
+              {uploadingPhoto ? '변경 중...' : '사진 변경'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 설정 모달 */}
+      {settingsOpen && (
+        <div className="profile-photo-modal" onClick={() => setSettingsOpen(false)}>
+          <div className="settings-modal__card" onClick={e => e.stopPropagation()}>
+            <div className="settings-modal__header">
+              <p className="settings-modal__title">설정</p>
+              <button className="profile-photo-modal__close" onClick={() => setSettingsOpen(false)}>
+                <Icon name="close" size={20} />
+              </button>
+            </div>
+
+            <p className="settings-modal__section-label">프로필 수정</p>
+            <div className="settings-modal__fields">
+              <TextField
+                label="닉네임"
+                placeholder="닉네임을 입력해주세요"
+                value={nickname}
+                onChange={(e) => setNickname((e.target as HTMLInputElement).value)}
+              />
+              <TextField
+                label="한줄 소개"
+                placeholder="나를 한 줄로 표현해보세요"
+                value={bio}
+                onChange={(e) => setBio((e.target as HTMLInputElement).value)}
+              />
+              <Button fullWidth onClick={handleSaveProfile} disabled={saving}>
+                {saving ? '저장 중...' : '저장하기'}
+              </Button>
+            </div>
+
+            <div className="settings-modal__divider" />
+
+            <div className="settings-modal__fields">
+              <button
+                className={`settings-delete-btn ${deleteConfirm ? 'settings-delete-btn--confirm' : ''}`}
+                onClick={handleDeleteAccount}
+              >
+                {deleteConfirm ? '다시 누르면 탈퇴됩니다' : '회원탈퇴'}
+              </button>
+              {deleteConfirm && (
+                <button className="settings-cancel-btn" onClick={() => setDeleteConfirm(false)}>
+                  취소
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleProfileImageChange} />
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </div>
   );
 };

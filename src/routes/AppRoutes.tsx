@@ -6,6 +6,7 @@ import Friend from '../pages/Friend/Friend';
 import DiaryWrite from '../pages/Diary/DiaryWrite';
 import DiaryDetail from '../pages/Diary/DiaryDetail';
 import MyPage from '../pages/MyPage/MyPage';
+import Settings from '../pages/Settings/Settings';
 import Login from '../pages/Login/Login';
 import Register from '../pages/Register/Register';
 
@@ -23,6 +24,7 @@ const AppRoutes = () => (
     <Route path="/diary/:id/edit" element={<DiaryWrite />} />
 
     <Route path="/mypage" element={<MyPage />} />
+    <Route path="/settings" element={<Settings />} />
 
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />

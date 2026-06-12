@@ -5,10 +5,8 @@ import { feedApi, type FeedItem } from '../../api/feedApi';
 import { userApi, type UserSearchResult } from '../../api/userApi';
 import './Feed.css';
 
-const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr);
-  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
-};
+import { formatDateKST } from '../../utils/dateUtils';
+const formatDate = formatDateKST;
 
 const FeedUser = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -20,7 +18,8 @@ const FeedUser = () => {
     if (!userId) return;
     feedApi.getFriendFeed(userId)
       .then((data) => {
-        setDiaries(data);
+        const sorted = [...data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setDiaries(sorted);
         if (data.length > 0) {
           setUser({
             id: data[0].authorId,
